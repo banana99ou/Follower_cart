@@ -61,29 +61,29 @@ def getObjects(img, thres, nms, draw=True, objects=[]):
 
     return img,objectInfo
 
-def turnright():
+def turnright(speed):
     GPIO.output(Dir_Pin_1, GPIO.HIGH)
     GPIO.output(Dir_Pin_2, GPIO.LOW)
-    p1.ChangeDutyCycle(15)
-    p2.ChangeDutyCycle(15)
+    p1.ChangeDutyCycle(speed)
+    p2.ChangeDutyCycle(speed)
     
-def turnleft():
+def turnleft(speed):
     GPIO.output(Dir_Pin_1, GPIO.LOW)
     GPIO.output(Dir_Pin_2, GPIO.HIGH)
-    p1.ChangeDutyCycle(15)
-    p2.ChangeDutyCycle(15)
+    p1.ChangeDutyCycle(speed)
+    p2.ChangeDutyCycle(speed)
     
 def accel():
     GPIO.output(Dir_Pin_1, GPIO.HIGH)
     GPIO.output(Dir_Pin_2, GPIO.HIGH)
-    p1.ChangeDutyCycle(50)
-    p2.ChangeDutyCycle(50)
+    p1.ChangeDutyCycle(20)
+    p2.ChangeDutyCycle(20)
     
 def goBack():
     GPIO.output(Dir_Pin_1, GPIO.LOW)
     GPIO.output(Dir_Pin_1, GPIO.LOW)
-    p1.ChangeDutyCycle(20)
-    p2.ChangeDutyCycle(20)
+    p1.ChangeDutyCycle(30)
+    p2.ChangeDutyCycle(30)
     
 def stop():
     GPIO.output(Dir_Pin_1, GPIO.LOW)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     while True:
         success, img = cap.read()
-        result, objectInfo = getObjects(img, 0.45, 0.2, objects=['person'])
+        result, objectInfo = getObjects(img, 0.50, 0.2, objects=['person'])
         print(objectInfo)
         cv2.imshow("Output",img)
         cv2.waitKey(1)
@@ -125,18 +125,30 @@ if __name__ == "__main__":
             
             print(square_mid_x)
             
-            if square_mid_x < 2*W/5:
+            if square_mid_x < 1.5*W/5:
                 print("person in LEFT")
-                turnleft()
-            elif square_mid_x > 3*W/5:
+                speed = 0.1*(W/2 - square_mid_x)
+                #if speed < 20:
+                #    speed = 0
+                if speed > 50:
+                    speed = 50;
+                print(speed)
+                turnleft(speed)
+            elif square_mid_x > 3.5*W/5:
                 print("person in RIGHT")
-                turnright()
+                speed = 0.1*(square_mid_x-W/2)
+                #if speed < 20:
+                #    speed = 0
+                if speed > 50:
+                    speed = 50;
+                print(speed)
+                turnright(speed)
             else:
                 print("person in FRONT")
                 percent = (height*width/H/W*100)
                 print(percent)
                 stop()
-                if (percent < 45):
+                if (percent < 35):
                     print("goForward")
                     accel()
                 #elif percent > 55:
